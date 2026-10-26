@@ -1270,6 +1270,7 @@ async function exportXlsx(c, silent) {
   const whoName = (c.student || fullName()).trim();
   const who = whoName ? ' – ' + whoName : '';
   const out = { blob: writeZip(files), name: safeName(c.name + who) + '.xlsx' };
+  if (silent === 'blob') return out;
   download(out.blob, out.name);
   if (!silent) toast('Täytetty Excel ladattu.');
   return out;
@@ -2328,15 +2329,16 @@ function nameDialog() {
 const TEACHERS_KEY = 'mathsmart.teachers', MAIL_KEY = 'mathsmart.mail';
 let teachers = [];
 try { teachers = JSON.parse(localStorage.getItem(TEACHERS_KEY) || '[]').filter(t => t?.id); } catch (e) { teachers = []; }
-let mailService = 'outlook';
-try { mailService = localStorage.getItem(MAIL_KEY) || 'outlook'; } catch (e) {}
+let mailService = 'eml';
+try { mailService = localStorage.getItem(MAIL_KEY) || 'eml'; } catch (e) {}
 const saveTeachers = () => { try { localStorage.setItem(TEACHERS_KEY, JSON.stringify(teachers)); localStorage.setItem(MAIL_KEY, mailService); } catch (e) {} };
 const validEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const MAIL_SERVICES = [
-  { k: 'outlook', label: 'Outlook – koulun Microsoft-tili (outlook.office.com)', url: (to, su, body) => `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
-  { k: 'outlookcom', label: 'Outlook.com – oma Microsoft-tili', url: (to, su, body) => `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
-  { k: 'gmail', label: 'Gmail', url: (to, su, body) => `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
-  { k: 'app', label: 'Tietokoneen sähköpostiohjelma', url: (to, su, body) => `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
+  { k: 'eml', label: 'Outlook-sovellus – valmis luonnos, Excel jo liitteenä (suositus)' },
+  { k: 'outlook', label: 'Outlook selaimessa – koulun Microsoft-tili (liite lisätään itse)', url: (to, su, body) => `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
+  { k: 'outlookcom', label: 'Outlook.com selaimessa – oma tili (liite lisätään itse)', url: (to, su, body) => `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
+  { k: 'gmail', label: 'Gmail selaimessa (liite lisätään itse)', url: (to, su, body) => `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
+  { k: 'app', label: 'Tietokoneen oletusohjelma ilman liitettä (mailto)', url: (to, su, body) => `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
 ];
 const courseTeacher = c => teachers.find(t => t.id === c.teacherId) || null;
 
@@ -2418,6 +2420,37 @@ function pickTeacher(c) {
   });
 }
 
+// Luonnos .eml-tiedostona: X-Unsent-otsake saa Outlookin avaamaan sen lähettämättömänä viestinä liitteineen
+const b64Lines = b64 => b64.replace(/.{1,76}/g, '$&\r\n');
+const mimeWord = t => /^[\x20-\x7e]*$/.test(t) ? t : '=?UTF-8?B?' + bytesToB64(new TextEncoder().encode(t)) + '?=';
+async function buildEml(to, toName, subject, body, file) {
+  const boundary = 'ms_' + uid() + uid();
+  const fileB64 = bytesToB64(new Uint8Array(await file.blob.arrayBuffer()));
+  const name = mimeWord(file.name);
+  const lines = [
+    `To: ${mimeWord(toName.replace(/["<>]/g, ''))} <${to}>`,
+    `Subject: ${mimeWord(subject)}`,
+    'X-Unsent: 1',
+    'MIME-Version: 1.0',
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    b64Lines(bytesToB64(new TextEncoder().encode(body.replace(/\n/g, '\r\n')))),
+    `--${boundary}`,
+    `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; name="${name}"`,
+    `Content-Disposition: attachment; filename="${name}"`,
+    'Content-Transfer-Encoding: base64',
+    '',
+    b64Lines(fileB64),
+    `--${boundary}--`,
+    '',
+  ];
+  return new Blob([lines.join('\r\n')], { type: 'message/rfc822' });
+}
+
 // Selain ei saa liittää tiedostoa sähköpostiin itse, joten Excel ladataan ja viesti avataan valmiiksi täytettynä
 async function sendToTeacher(c) {
   if (!teachers.length) { toast('Lisää ensin opettaja.'); teachersDialog(() => sendToTeacher(c)); return; }
@@ -2428,13 +2461,32 @@ async function sendToTeacher(c) {
     c.teacherId = t.id; touch(c);
     $('#teacherLine')?.replaceWith(teacherLine(c));
   }
+  const svc = MAIL_SERVICES.find(m => m.k === mailService) || MAIL_SERVICES[0];
   let out;
-  try { out = await exportXlsx(c, true); } catch (e) { toast('Vienti epäonnistui: ' + e.message); return; }
+  try { out = await exportXlsx(c, svc.k === 'eml' ? 'blob' : true); } catch (e) { toast('Vienti epäonnistui: ' + e.message); return; }
   if (!out) return;
   const student = (c.student || fullName()).trim();
   const subject = `Opiskelupöytäkirja – ${c.name}${student ? ' – ' + student : ''}`;
   const body = `Hei ${t.name.trim()},\n\nliitteenä opiskelupöytäkirjani kurssilta ${c.name}.\n\nTerveisin\n${student || ''}`.trimEnd();
-  const svc = MAIL_SERVICES.find(m => m.k === mailService) || MAIL_SERVICES[0];
+  if (svc.k === 'eml') {
+    const eml = await buildEml(t.email, t.name, subject, body, out);
+    const emlName = safeName(`Viesti opettajalle – ${c.name}`) + '.eml';
+    download(eml, emlName);
+    c.sentAt = Date.now(); touch(c);
+    openDialog(
+      h('div', { class: 'dlg-body' },
+        h('h2', {}, 'Luonnos on valmis'),
+        h('p', {}, `Viesti opettajalle ${t.name} (${t.email}) on tehty valmiiksi, ja täytetty Excel on jo liitteenä.`),
+        h('ol', { class: 'send-steps' },
+          h('li', {}, h('div', {}, h('div', {}, 'Avaa ladattu viesti.'), h('div', { class: 'file-chip', style: 'cursor:default' }, h('i', { style: 'background:#0f6cbd' }, '✉'), emlName),
+            h('small', {}, 'Klikkaa sitä Edgen latauslistassa (Ctrl + J). Se aukeaa Outlookissa lähettämättömänä luonnoksena.'))),
+          h('li', {}, h('div', {}, 'Tarkista viesti ja paina Lähetä.')),
+          h('li', {}, h('div', {}, 'Vinkki', h('small', {}, 'Valitse latauslistassa tiedoston kohdalta ⋯ → ”Avaa aina tämäntyyppiset tiedostot”, niin jatkossa luonnos aukeaa Outlookiin heti.'))))),
+      h('div', { class: 'dlg-foot' },
+        h('button', { class: 'btn left', onclick: () => download(eml, emlName) }, 'Lataa uudelleen'),
+        h('button', { class: 'btn primary', onclick: () => dlg.close() }, 'Valmis')));
+    return;
+  }
   const url = svc.url(t.email, subject, body);
   const openMail = () => { if (svc.k === 'app') location.href = url; else window.open(url, '_blank', 'noopener'); };
   openMail();
