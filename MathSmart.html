@@ -657,10 +657,9 @@ dialog:not(.streak)[open]::backdrop { animation: bdIn .4s ease both; }
   background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom)), var(--surface);
   -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
   box-shadow: inset 0 1px 0 var(--edge), 0 14px 34px -14px rgba(0, 0, 0, .5);
-  transition: transform .45s var(--spring), box-shadow .35s;
+  transition: background .2s, color .2s, border-color .2s;
 }
-.calc-fab:hover { transform: translateY(-3px) rotate(-4deg); box-shadow: inset 0 1px 0 var(--edge), 0 20px 40px -14px rgba(0, 0, 0, .55); }
-.calc-fab:active { transform: scale(.92); }
+.calc-fab:hover { border-color: var(--hairline-strong); }
 .calc-fab svg { width: 24px; height: 24px; }
 .calc-fab.on { background: var(--solid); color: var(--on-solid); }
 .calc {
