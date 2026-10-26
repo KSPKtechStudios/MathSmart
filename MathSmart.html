@@ -650,6 +650,32 @@ dialog:not(.streak)[open]::backdrop { animation: bdIn .4s ease both; }
 .cell.flash { animation: cellFlash 1.6s var(--out); }
 @keyframes cellFlash { 0%, 40% { box-shadow: 0 0 0 3px var(--accent); transform: scale(1.12); } }
 
+
+/* ---------- Opettajat ---------- */
+.teacher-line { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; color: var(--muted); font-size: 14px; max-width: 460px; }
+.teacher-line > span { margin-right: 4px; }
+.tchip { border: 1px solid var(--hairline-strong); background: transparent; border-radius: 999px; padding: 3px 12px; font-size: 13px; color: var(--muted); transition: background .2s, border-color .2s, color .2s; }
+.tchip:hover { color: var(--ink); border-color: var(--faint); }
+.tchip.on { color: var(--ink); font-weight: 600; background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.tchip.add { border-style: dashed; }
+.btn .send { display: inline-block; transition: transform .4s var(--out); }
+.btn:hover .send { transform: translate(2px, -1px); }
+.t-rows { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.t-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1.3fr) 30px; gap: 10px; align-items: center; }
+.t-row > b { font-family: var(--display); color: var(--faint); font-size: 14px; }
+.t-row .x { border: 0; background: transparent; color: var(--faint); font-size: 18px; border-radius: 6px; height: 30px; }
+.t-row .x:hover { color: var(--warn); background: var(--row-hover); }
+.t-row .input.bad { border-bottom-color: var(--warn); }
+.mail-pick { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; font-size: 14px; color: var(--muted); }
+.mail-pick select { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--hairline-strong); background: var(--field); color: var(--ink); }
+.mail-pick select option { background: var(--bg); color: var(--ink); }
+.send-steps { margin: 4px 0 6px; padding: 0; list-style: none; counter-reset: st; display: flex; flex-direction: column; gap: 12px; }
+.send-steps li { counter-increment: st; display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; font-size: 14.5px; }
+.send-steps li::before { content: counter(st); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 13px; }
+.send-steps small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.file-chip { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 7px 12px; border-radius: 9px; border: 1px solid var(--hairline-strong); background: var(--field); font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none; }
+.file-chip i { font-style: normal; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 5px; background: #1f7a4a; color: #fff; font-size: 11px; font-weight: 700; }
+@media (max-width: 600px) { .teacher-line { justify-content: flex-start; } .t-row { grid-template-columns: 18px 1fr 30px; } .t-row .input:nth-of-type(2) { grid-column: 2; } }
 /* ---------- Laskin ---------- */
 .calc-fab {
   position: fixed; right: 22px; bottom: 22px; z-index: 70; width: 52px; height: 52px; border-radius: 16px; border: 1px solid var(--rim);
@@ -1136,7 +1162,7 @@ function scaleWord(c, n) {
 }
 
 /* ---------- Täytetyn Excelin vienti ---------- */
-async function exportXlsx(c) {
+async function exportXlsx(c, silent) {
   const bytes = getFile(c.id);
   if (!bytes) { toast('Alkuperäistä Excel-tiedostoa ei löytynyt.'); return; }
   const entries = await readZip(bytes.buffer);
@@ -1243,8 +1269,10 @@ async function exportXlsx(c) {
   }
   const whoName = (c.student || fullName()).trim();
   const who = whoName ? ' – ' + whoName : '';
-  download(writeZip(files), safeName(c.name + who) + '.xlsx');
-  toast('Täytetty Excel ladattu.');
+  const out = { blob: writeZip(files), name: safeName(c.name + who) + '.xlsx' };
+  download(out.blob, out.name);
+  if (!silent) toast('Täytetty Excel ladattu.');
+  return out;
 }
 
 /* ---------- Streak ---------- */
@@ -1509,9 +1537,11 @@ function renderCourse(c, sheetIdx) {
       h('div', { class: 'c-side' },
         h('label', { class: 'name-line' }, 'Nimi',
           h('input', { value: c.student, placeholder: 'Etunimi Sukunimi', oninput: e => { c.student = e.target.value; touch(c); } })),
+        teacherLine(c),
         h('div', { class: 'actions' },
           h('button', { class: 'btn', onclick: () => courseSettings(c) }, 'Asetukset'),
-          h('button', { class: 'btn primary', onclick: () => exportCourse(c) }, h('span', { class: 'dl' }, '↓'), ' Lataa täytetty Excel')))),
+          h('button', { class: 'btn', onclick: () => exportCourse(c) }, h('span', { class: 'dl' }, '↓'), ' Lataa Excel'),
+          h('button', { class: 'btn primary', onclick: () => sendToTeacher(c) }, h('span', { class: 'send' }, '✉'), ' Lähetä opettajalle')))),
     score);
 
   if (sheet) {
@@ -1912,7 +1942,7 @@ function backupNow() {
   const files = {};
   for (const c of courses) { const s = localStorage.getItem(FILEKEY + c.id); if (s) files[c.id] = s; }
   const d = new Date().toISOString().slice(0, 10);
-  download(new Blob([JSON.stringify({ app: 'opiskelupoytakirjat', version: 1, saved: Date.now(), courses, files, days: [...activeDays], profile })], { type: 'application/json' }), `mathsmart-varmuuskopio-${d}.json`);
+  download(new Blob([JSON.stringify({ app: 'opiskelupoytakirjat', version: 1, saved: Date.now(), courses, files, days: [...activeDays], profile, teachers, mailService })], { type: 'application/json' }), `mathsmart-varmuuskopio-${d}.json`);
   toast('Varmuuskopio tallennettu Lataukset-kansioon.');
 }
 async function clearMarks(c) {
@@ -1939,7 +1969,7 @@ function jumpToEmpty(c) {
   row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
 }
 function showShortcuts() {
-  const keys = [['Ctrl + O', 'Tuo Excel'], ['Ctrl + S', 'Lataa täytetty Excel'], ['Ctrl + Z', 'Kumoa viimeisin muutos'], ['F1', 'Pikanäppäimet'], ['F2', 'Avaa tai sulje laskin'], ['1 – 4', 'Valitse merkintätapa: tehty, kesken, myöhemmin, apua'], ['Hiiren oikea', 'Kaikki vaihtoehdot ja muistiinpano tehtävälle'], ['Esc', 'Sulje valikko tai ikkuna']];
+  const keys = [['Ctrl + O', 'Tuo Excel'], ['Ctrl + S', 'Lataa täytetty Excel'], ['Ctrl + E', 'Lähetä opettajalle'], ['Ctrl + Z', 'Kumoa viimeisin muutos'], ['F1', 'Pikanäppäimet'], ['F2', 'Avaa tai sulje laskin'], ['1 – 4', 'Valitse merkintätapa: tehty, kesken, myöhemmin, apua'], ['Hiiren oikea', 'Kaikki vaihtoehdot ja muistiinpano tehtävälle'], ['Esc', 'Sulje valikko tai ikkuna']];
   openDialog(
     h('div', { class: 'dlg-body' }, h('h2', {}, 'Pikanäppäimet'),
       h('table', { class: 'keys' }, h('tbody', {}, keys.map(([k, t]) => h('tr', {}, h('td', {}, k.split(' + ').map((x, i) => [i ? ' + ' : null, h('kbd', {}, x)])), h('td', {}, t)))))),
@@ -1966,6 +1996,7 @@ function menuDefs() {
     { label: 'Tiedosto', items: [
       { label: 'Tuo Excel…', key: 'Ctrl+O', run: () => $('#fileInput').click() },
       { label: 'Lataa täytetty Excel', key: 'Ctrl+S', off: !c, run: () => exportCourse(c) },
+      { label: 'Lähetä opettajalle…', key: 'Ctrl+E', off: !c, run: () => sendToTeacher(c) },
       { label: 'Lataa alkuperäinen Excel', off: !c, run: () => downloadOriginal(c) },
       '-',
       { label: 'Tallenna varmuuskopio', run: backupNow },
@@ -1977,6 +2008,7 @@ function menuDefs() {
       { label: undoStack.length ? `Kumoa: ${undoStack[undoStack.length - 1].label}` : 'Kumoa', key: 'Ctrl+Z', off: !undoStack.length, run: undo },
       '-',
       { label: 'Vaihda nimeä…', run: nameDialog },
+      { label: 'Opettajat…', run: () => teachersDialog() },
       { label: 'Kurssin asetukset…', off: !c, run: () => courseSettings(c) },
       { label: 'Tyhjennä kurssin merkinnät…', off: !c, danger: true, run: () => clearMarks(c) },
       { label: 'Poista kurssi…', off: !c, danger: true, run: () => deleteCourse(c) },
@@ -2070,6 +2102,7 @@ document.addEventListener('keydown', e => {
   else if (mod && !e.shiftKey && !e.altKey && key === 'z' && !typing) { e.preventDefault(); undo(); }
   else if (e.key === 'F1') { e.preventDefault(); showShortcuts(); }
   else if (e.key === 'F2') { e.preventDefault(); toggleCalc(); }
+  else if (mod && !e.shiftKey && !e.altKey && key === 'e') { e.preventDefault(); const c = currentCourse(); if (c) sendToTeacher(c); else toast('Avaa ensin kurssi.'); }
   else if (!mod && !e.altKey && !typing && !dlg.open && /^[1-4]$/.test(e.key) && currentCourse()) { setBrush(STATUSES[+e.key - 1].k); toast('Klikkaus merkitsee: ' + STATUSES[+e.key - 1].label); }
   else if (e.key === 'Escape' && openMenuIdx !== -1) closeMenu();
 });
@@ -2172,6 +2205,10 @@ async function restoreBackup(file) {
     }
     if (Array.isArray(data.days)) { data.days.forEach(d => activeDays.add(d)); saveDays(); }
     if ((data.profile?.name || data.profile?.first) && !profile) { profile = normalizeProfile(data.profile); saveProfile(); }
+    if (Array.isArray(data.teachers)) {
+      for (const t of data.teachers) if (t?.id && !teachers.some(x => x.id === t.id || (x.email && x.email === t.email))) teachers.push(t);
+      saveTeachers();
+    }
     saveNow(); loadDays(); drawStreakBtn(); go('#/'); toast(`Palautettu ${n} kurssia.`);
   } catch (e) { toast('Palautus epäonnistui: ' + e.message); }
 }
@@ -2285,6 +2322,141 @@ function nameDialog() {
       h('button', { type: 'button', class: 'btn', onclick: () => dlg.close() }, 'Peruuta'),
       h('button', { type: 'submit', class: 'btn primary' }, 'Tallenna'))));
   setTimeout(() => input.focus(), 50);
+}
+
+/* ---------- Opettajat ja lähetys ---------- */
+const TEACHERS_KEY = 'mathsmart.teachers', MAIL_KEY = 'mathsmart.mail';
+let teachers = [];
+try { teachers = JSON.parse(localStorage.getItem(TEACHERS_KEY) || '[]').filter(t => t?.id); } catch (e) { teachers = []; }
+let mailService = 'outlook';
+try { mailService = localStorage.getItem(MAIL_KEY) || 'outlook'; } catch (e) {}
+const saveTeachers = () => { try { localStorage.setItem(TEACHERS_KEY, JSON.stringify(teachers)); localStorage.setItem(MAIL_KEY, mailService); } catch (e) {} };
+const validEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const MAIL_SERVICES = [
+  { k: 'outlook', label: 'Outlook – koulun Microsoft-tili (outlook.office.com)', url: (to, su, body) => `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
+  { k: 'outlookcom', label: 'Outlook.com – oma Microsoft-tili', url: (to, su, body) => `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
+  { k: 'gmail', label: 'Gmail', url: (to, su, body) => `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
+  { k: 'app', label: 'Tietokoneen sähköpostiohjelma', url: (to, su, body) => `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(su)}&body=${encodeURIComponent(body)}` },
+];
+const courseTeacher = c => teachers.find(t => t.id === c.teacherId) || null;
+
+function teacherLine(c) {
+  const line = h('div', { class: 'teacher-line', id: 'teacherLine' });
+  const draw = () => {
+    const sel = courseTeacher(c);
+    line.replaceChildren(h('span', {}, 'Opettaja'),
+      ...teachers.map(t => h('button', {
+        class: 'tchip' + (sel === t ? ' on' : ''), 'aria-pressed': String(sel === t), title: `${t.name} <${t.email}>`,
+        onclick: () => { c.teacherId = sel === t ? null : t.id; touch(c); draw(); },
+      }, t.name)),
+      h('button', { class: 'tchip add', title: 'Lisää tai muokkaa opettajia', onclick: () => teachersDialog(() => draw()) }, teachers.length ? 'Muokkaa…' : '+ Lisää opettaja'));
+  };
+  draw();
+  return line;
+}
+
+function teachersDialog(after) {
+  const rows = teachers.map(t => ({ ...t }));
+  const list = h('div', { class: 't-rows' });
+  const draw = focusLast => {
+    list.replaceChildren(...rows.map((t, i) => {
+      const name = h('input', { class: 'input', value: t.name, placeholder: 'Nimi, esim. Virtanen', 'aria-label': `Opettajan ${i + 1} nimi`, oninput: e => { t.name = e.target.value; } });
+      const email = h('input', { class: 'input', type: 'email', value: t.email, placeholder: 'sahkoposti@koulu.fi', 'aria-label': `Opettajan ${i + 1} sähköposti`,
+        oninput: e => { t.email = e.target.value.trim(); e.target.classList.remove('bad'); } });
+      return h('div', { class: 't-row' }, h('b', {}, '#' + (i + 1)), name, email,
+        h('button', { type: 'button', class: 'x', title: 'Poista', 'aria-label': `Poista opettaja ${i + 1}`, onclick: () => { rows.splice(i, 1); draw(); } }, '×'));
+    }));
+    if (!rows.length) list.append(h('p', { class: 'note', style: 'margin:0' }, 'Ei vielä opettajia. Lisää ensimmäinen alta.'));
+    if (focusLast) list.querySelector('.t-row:last-child input')?.focus();
+  };
+  draw();
+  const service = h('select', { 'aria-label': 'Sähköpostipalvelu' }, MAIL_SERVICES.map(m => h('option', { value: m.k, selected: m.k === mailService }, m.label)));
+  const save = () => {
+    const kept = rows.map(t => ({ ...t, name: t.name.trim(), email: t.email.trim() })).filter(t => t.name || t.email);
+    const bad = kept.findIndex(t => !validEmail(t.email));
+    if (bad !== -1) {
+      const inp = list.querySelectorAll('.t-row')[rows.indexOf(rows.find(r => r.id === kept[bad].id))]?.querySelectorAll('input')[1];
+      inp?.classList.add('bad'); inp?.focus();
+      toast('Tarkista sähköpostiosoite.');
+      return;
+    }
+    teachers = kept.map(t => ({ ...t, name: t.name || t.email.split('@')[0] }));
+    mailService = service.value;
+    saveTeachers();
+    for (const c of courses) if (c.teacherId && !teachers.some(t => t.id === c.teacherId)) { c.teacherId = null; touch(c); }
+    dlg.close();
+    const c = currentCourse();
+    if (c) $('#teacherLine')?.replaceWith(teacherLine(c));
+    toast('Opettajat tallennettu.');
+    after?.();
+  };
+  openDialog(h('form', { onsubmit: e => { e.preventDefault(); save(); } },
+    h('div', { class: 'dlg-body' },
+      h('h2', {}, 'Opettajat'),
+      h('p', {}, 'Lisää opettajien nimet ja sähköpostit. Pöytäkirjassa voit sitten valita opettajan yhdellä klikkauksella ja lähettää täytetyn Excelin hänelle.'),
+      list,
+      h('button', { type: 'button', class: 'btn', onclick: () => { rows.push({ id: uid(), name: '', email: '' }); draw(true); } }, h('span', { class: 'plus' }, '+'), ' Lisää opettaja'),
+      h('label', { class: 'mail-pick' }, 'Millä sähköpostilla lähetät?', service)),
+    h('div', { class: 'dlg-foot' },
+      h('button', { type: 'button', class: 'btn', onclick: () => dlg.close() }, 'Peruuta'),
+      h('button', { type: 'submit', class: 'btn primary' }, 'Tallenna'))));
+  if (!rows.length) { rows.push({ id: uid(), name: '', email: '' }); draw(true); }
+}
+
+function pickTeacher(c) {
+  return new Promise(res => {
+    const done = t => { dlg.close(); res(t); };
+    openDialog(h('div', { class: 'dlg-body' },
+      h('h2', {}, 'Kenelle lähetetään?'),
+      h('p', {}, 'Valitse opettaja. Valinta muistetaan tälle kurssille.'),
+      h('div', { class: 'teacher-line', style: 'justify-content:flex-start;max-width:none' },
+        teachers.map(t => h('button', { class: 'tchip', title: t.email, onclick: () => done(t) }, t.name)))),
+      h('div', { class: 'dlg-foot' },
+        h('button', { class: 'btn left', onclick: () => { dlg.close(); res(null); teachersDialog(); } }, 'Muokkaa opettajia…'),
+        h('button', { class: 'btn', onclick: () => done(null) }, 'Peruuta')));
+    dlg.addEventListener('cancel', () => res(null), { once: true });
+  });
+}
+
+// Selain ei saa liittää tiedostoa sähköpostiin itse, joten Excel ladataan ja viesti avataan valmiiksi täytettynä
+async function sendToTeacher(c) {
+  if (!teachers.length) { toast('Lisää ensin opettaja.'); teachersDialog(() => sendToTeacher(c)); return; }
+  let t = courseTeacher(c);
+  if (!t) {
+    t = await pickTeacher(c);
+    if (!t) return;
+    c.teacherId = t.id; touch(c);
+    $('#teacherLine')?.replaceWith(teacherLine(c));
+  }
+  let out;
+  try { out = await exportXlsx(c, true); } catch (e) { toast('Vienti epäonnistui: ' + e.message); return; }
+  if (!out) return;
+  const student = (c.student || fullName()).trim();
+  const subject = `Opiskelupöytäkirja – ${c.name}${student ? ' – ' + student : ''}`;
+  const body = `Hei ${t.name.trim()},\n\nliitteenä opiskelupöytäkirjani kurssilta ${c.name}.\n\nTerveisin\n${student || ''}`.trimEnd();
+  const svc = MAIL_SERVICES.find(m => m.k === mailService) || MAIL_SERVICES[0];
+  const url = svc.url(t.email, subject, body);
+  const openMail = () => { if (svc.k === 'app') location.href = url; else window.open(url, '_blank', 'noopener'); };
+  openMail();
+  c.sentAt = Date.now(); touch(c);
+  const chip = h('div', { class: 'file-chip', draggable: 'true', title: 'Raahaa tämä sähköpostiviestiin' }, h('i', {}, 'X'), out.name);
+  const href = URL.createObjectURL(out.blob);
+  chip.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('DownloadURL', `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:${out.name}:${href}`);
+    e.dataTransfer.effectAllowed = 'copy';
+  });
+  openDialog(
+    h('div', { class: 'dlg-body' },
+      h('h2', {}, 'Viesti on valmiina'),
+      h('p', {}, `Vastaanottaja ${t.name} (${t.email}), otsikko ja viesti on täytetty valmiiksi. Liite pitää lisätä itse, koska selain ei saa liittää tiedostoja sähköpostiin.`),
+      h('ol', { class: 'send-steps' },
+        h('li', {}, h('div', {}, 'Täytetty Excel on ladattu Lataukset-kansioon.', chip)),
+        h('li', {}, h('div', {}, 'Lisää se viestiin liitteeksi.', h('small', {}, 'Raahaa tiedosto yllä olevasta tai Edgen latauslistasta (Ctrl + J) viestiin, tai valitse viestissä Liitä → Selaa tätä tietokonetta → Lataukset.'))),
+        h('li', {}, 'Paina viestissä Lähetä.'))),
+    h('div', { class: 'dlg-foot' },
+      h('button', { class: 'btn left', onclick: openMail }, 'Avaa viesti uudelleen'),
+      h('button', { class: 'btn primary', onclick: () => dlg.close() }, 'Valmis')));
+  dlg.addEventListener('close', () => setTimeout(() => URL.revokeObjectURL(href), 60000), { once: true });
 }
 
 /* ---------- Laskin ---------- */

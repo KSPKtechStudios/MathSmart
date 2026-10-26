@@ -7,6 +7,7 @@ MathSmart on matematiikan opiskelupöytäkirjasovellus. Tuo opettajan Excel-pohj
 ## Ominaisuudet
 
 - Opettajan Excel-tiedoston tuonti ja täytetyn pöytäkirjan vienti
+- Opettajalista (nimi + sähköposti): valitse kurssin opettaja yhdellä klikkauksella ja lähetä täytetty Excel (Ctrl+E) Outlookilla, Gmaililla tai sähköpostiohjelmalla
 - Excel-tyylinen taulukko: luvut riveinä, osaamistasot (perus, hyvä, mestari) sarakkeina
 - Sama tehtävä voidaan merkitä usealle tasolle, ja pisteet lasketaan tasoittain
 - Omat merkintätavat: tehty (lasketaan pisteisiin), kesken, katso myöhemmin ja tarvitsen apua sekä muistiinpano tehtävään (oikea klikkaus)
@@ -34,4 +35,4 @@ Valitse pikakuvakkeen ominaisuuksista kuvakkeeksi `MathSmart.ico`.
 
 ## Tietosuoja
 
-Kaikki tiedot (merkinnät, nimi, streak) tallentuvat vain oman selaimesi paikalliseen muistiin. Mitään ei lähetetä mihinkään palvelimelle.
+Kaikki tiedot (merkinnät, nimi, opettajat, streak) tallentuvat vain oman selaimesi paikalliseen muistiin. Mitään ei lähetetä mihinkään palvelimelle.
