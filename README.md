@@ -12,7 +12,8 @@ MathSmart on matematiikan opiskelupöytäkirjasovellus. Tuo opettajan Excel-pohj
 - Päivittäinen streak
 - Valikkorivi (Tiedosto · Muokkaa · Näytä · Työkalut · Ohje) ja kumoaminen (Ctrl+Z)
 - Tumma ja vaalea teema
-- Oma käyttäjätili sekä varmuuskopion tallennus ja palautus
+- Kysyy ensimmäisellä kerralla nimesi ja tervehtii sinua nimeltä
+- Varmuuskopion tallennus ja palautus
 
 ## Käyttö
 
@@ -31,4 +32,4 @@ Valitse pikakuvakkeen ominaisuuksista kuvakkeeksi `MathSmart.ico`.
 
 ## Tietosuoja
 
-Kaikki tiedot (merkinnät, käyttäjätili, streak) tallentuvat vain oman selaimesi paikalliseen muistiin. Mitään ei lähetetä mihinkään palvelimelle.
+Kaikki tiedot (merkinnät, nimi, streak) tallentuvat vain oman selaimesi paikalliseen muistiin. Mitään ei lähetetä mihinkään palvelimelle.

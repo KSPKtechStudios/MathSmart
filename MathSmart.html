@@ -546,18 +546,8 @@ dialog:not(.streak)[open]::backdrop { animation: bdIn .4s ease both; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
 }
-/* ---------- Tili ja tervehdys ---------- */
-.avatar {
-  --av: #5b5fc9;
-  width: 34px; height: 34px; margin-left: 6px; border-radius: 50%; border: 0; padding: 0; flex: none;
-  display: grid; place-items: center; color: #fff; background: var(--av);
-  font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: .02em;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 0 0 2px var(--bg), 0 0 0 3px color-mix(in srgb, var(--av) 45%, transparent);
-  transition: transform .5s var(--spring), box-shadow .35s;
-}
-.avatar[hidden] { display: none; }
-button.avatar:hover { transform: scale(1.1) rotate(-6deg); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 0 0 2px var(--bg), 0 0 0 4px var(--av); }
-.page-title .who { color: var(--av, var(--accent)); }
+/* ---------- Tervehdys ---------- */
+.page-title .who { color: var(--accent); }
 .list-title { margin: 34px 0 0; padding-bottom: 12px; border-bottom: 1px solid var(--hairline-strong); font-family: var(--display); font-size: 19px; font-weight: 600; }
 .home-top.greet { border-bottom: 0; padding-bottom: 0; }
 .streak-hello { font-family: var(--display); font-size: 21px; font-weight: 600; margin-bottom: 2px; }
@@ -579,24 +569,18 @@ button.avatar:hover { transform: scale(1.1) rotate(-6deg); box-shadow: inset 0 1
 @keyframes plusSpin { from { transform: rotate(-180deg) scale(0); } }
 .ob-card h1 { font-family: var(--display); font-size: 34px; font-weight: 600; line-height: 1.05; margin: 0 0 10px; }
 .ob-card > p { color: var(--muted); margin: 0 0 24px; }
-.ob-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }
-.ob-fields .full { grid-column: 1 / -1; }
-.swatches { display: flex; gap: 10px; margin-top: 8px; }
-.swatch { width: 28px; height: 28px; border-radius: 50%; border: 0; padding: 0; background: var(--sw); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px transparent; transition: transform .45s var(--spring), box-shadow .3s; }
-.swatch:hover { transform: scale(1.14); }
-.swatch.on { transform: scale(1.06); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--sw); }
-.ob-preview { display: flex; align-items: center; gap: 12px; margin-top: 22px; color: var(--muted); font-size: 15px; }
-.ob-preview .avatar { width: 44px; height: 44px; margin: 0; font-size: 17px; }
+.ob-card .field { display: block; }
+.ob-card .field .input { width: 100%; height: 46px; font-size: 17px; }
 .ob-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 26px; }
 .ob-actions small { color: var(--faint); font-size: 12.5px; }
 .btn.big { height: 42px; padding: 0 22px; font-size: 15px; border-radius: 10px; }
 .shake { animation: shake .45s; }
 @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 .ob-hello { text-align: center; font-family: var(--display); font-size: clamp(48px, 9vw, 96px); font-weight: 600; line-height: 1; animation: helloIn 1.1s var(--out) both; }
-.ob-hello span { color: var(--av); }
+.ob-hello span { color: var(--accent); }
 .ob-hello small { display: block; margin-top: 18px; font-family: "Segoe UI", system-ui, sans-serif; font-size: 18px; font-weight: 400; color: var(--muted); animation: rise 1s var(--out) .4s both; }
 @keyframes helloIn { from { opacity: 0; transform: scale(.85); filter: blur(14px); } }
-@media (max-width: 520px) { .ob-fields { grid-template-columns: 1fr; } .ob-card { padding: 26px 22px 22px; } }
+@media (max-width: 520px) { .ob-card { padding: 26px 22px 22px; } }
 
 @media (max-width: 760px) {
   .menubar { margin-left: 6px; padding-left: 6px; overflow-x: auto; scrollbar-width: none; }
@@ -646,7 +630,6 @@ button.avatar:hover { transform: scale(1.1) rotate(-6deg); box-shadow: inset 0 1
   <button class="streak-btn" id="streakBtn" title="Streak"></button>
   <button class="btn ghost icon-btn" id="themeBtn" title="Vaihda teema" aria-label="Vaihda teema"></button>
   <button class="btn primary" id="importBtn"><span class="plus">+</span> Tuo Excel</button>
-  <button class="avatar" id="avatarBtn" hidden aria-label="Oma tili"></button>
   <input type="file" id="fileInput" accept=".xlsx" multiple hidden>
   <input type="file" id="backupInput" accept=".json,application/json" hidden>
 </header>
@@ -1270,7 +1253,7 @@ function showStreak() {
   openDialog(
     h('div', { class: 'streak-aura', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')),
     h('div', { class: 'streak-body' },
-      profile ? h('div', { class: 'streak-hello' }, `${greeting()}, ${profile.first}!`) : null,
+      profile ? h('div', { class: 'streak-hello' }, `${greeting()}, ${firstName()}!`) : null,
       h('div', { class: 'flame-wrap' }, h('div', { class: 'flame-halo' }), svg),
       num,
       h('div', { class: 'streak-unit', style: '--i:2' }, 'päivän streak'),
@@ -1329,7 +1312,7 @@ function renderHome() {
   document.title = 'MathSmart';
   const wrap = h('div', { class: 'wrap' + (entering ? ' enter' : '') });
   app.replaceChildren(wrap);
-  const hello = profile ? h('span', {}, `${greeting()}, `, h('span', { class: 'who' }, profile.first)) : null;
+  const hello = profile ? h('span', {}, `${greeting()}, `, h('span', { class: 'who' }, firstName())) : null;
   if (!courses.length) {
     wrap.append(h('div', { class: 'empty-state' }, logoEl(),
       h('h1', { class: 'page-title' }, hello ? [hello, h('br'), 'tuodaan ensimmäinen pöytäkirja'] : 'Tuo ensimmäinen opiskelupöytäkirja'),
@@ -1720,7 +1703,7 @@ function menuDefs() {
     { label: 'Muokkaa', items: [
       { label: undoStack.length ? `Kumoa: ${undoStack[undoStack.length - 1].label}` : 'Kumoa', key: 'Ctrl+Z', off: !undoStack.length, run: undo },
       '-',
-      { label: 'Oma tili…', run: accountDialog },
+      { label: 'Vaihda nimeä…', run: nameDialog },
       { label: 'Kurssin asetukset…', off: !c, run: () => courseSettings(c) },
       { label: 'Tyhjennä kurssin merkinnät…', off: !c, danger: true, run: () => clearMarks(c) },
       { label: 'Poista kurssi…', off: !c, danger: true, run: () => deleteCourse(c) },
@@ -1907,7 +1890,7 @@ async function restoreBackup(file) {
       courses = courses.filter(x => x.id !== c.id).concat(c);
     }
     if (Array.isArray(data.days)) { data.days.forEach(d => activeDays.add(d)); saveDays(); }
-    if (data.profile?.first && !profile) { profile = data.profile; saveProfile(); drawAvatar(); }
+    if ((data.profile?.name || data.profile?.first) && !profile) { profile = normalizeProfile(data.profile); saveProfile(); }
     saveNow(); loadDays(); drawStreakBtn(); go('#/'); toast(`Palautettu ${n} kurssia.`);
   } catch (e) { toast('Palautus epäonnistui: ' + e.message); }
 }
@@ -1931,141 +1914,96 @@ async function handleFiles(list) {
 $('#importBtn').onclick = () => $('#fileInput').click();
 $('#homeBtn').onclick = () => go('#/');
 $('#streakBtn').onclick = showStreak;
-$('#avatarBtn').onclick = () => accountDialog();
 
-/* ---------- Tili ---------- */
+/* ---------- Nimi ---------- */
 const PROFILE_KEY = 'mathsmart.profile';
-const AV_COLORS = ['#5b5fc9', '#3f7fa8', '#4a8a6c', '#a3833d', '#b5643b', '#a0508f'];
 let profile = null;
+// Vanha tili (etunimi + sukunimi) muuttuu pelkäksi nimeksi
+function normalizeProfile(p) {
+  if (!p) return null;
+  const name = (p.name || [p.first, p.last].filter(Boolean).join(' ')).trim();
+  return name ? { name } : null;
+}
 function loadProfile() {
-  try { profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null'); } catch (e) { profile = null; }
+  try { profile = normalizeProfile(JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null')); } catch (e) { profile = null; }
+  if (profile) saveProfile();
 }
 function saveProfile() { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch (e) {} }
-const fullName = () => profile ? [profile.first, profile.last].filter(Boolean).join(' ') : '';
-const initials = p => ((p.first || '?')[0] + (p.last ? p.last[0] : '')).toUpperCase();
+const fullName = () => profile?.name || '';
+const firstName = () => fullName().split(/\s+/)[0];
 function greeting() {
   const hr = new Date().getHours();
   return hr >= 5 && hr < 10 ? 'Huomenta' : hr >= 17 && hr < 23 ? 'Iltaa' : 'Hei';
 }
-function drawAvatar() {
-  const b = $('#avatarBtn');
-  b.hidden = !profile;
-  if (!profile) return;
-  b.textContent = initials(profile);
-  b.title = fullName() + ' – oma tili';
-  document.documentElement.style.setProperty('--av', profile.color);
-  b.style.setProperty('--av', profile.color);
-}
 const LOGO_SVG = cls => `<svg class="${cls}" viewBox="408 376 486 296" aria-hidden="true"><g class="lg-m" fill="currentColor"><polygon points="412,415 630,588 600,612 452,495 452,670 412,670"/><polygon points="610,553 770,428 770,470 640,578"/><polygon points="748,537 790,505 790,667 748,667"/></g><path class="lg-plus" fill="#2077ff" d="M822 380h30v38h38v30h-38v40h-30v-40h-39v-30h39z"/></svg>`;
 
-// Lomake on yhteinen tilin luonnille ja muokkaukselle
-function accountForm(p, onSubmit) {
-  const first = h('input', { class: 'input', value: p?.first || '', placeholder: 'Etunimi', autocomplete: 'given-name' });
-  const last = h('input', { class: 'input', value: p?.last || '', placeholder: 'Sukunimi', autocomplete: 'family-name' });
-  const group = h('input', { class: 'input', value: p?.group || '', placeholder: 'esim. 1C' });
-  let color = p?.color || AV_COLORS[0];
-  const av = h('div', { class: 'avatar' });
-  const avText = h('span', {});
-  const update = () => {
-    const f = first.value.trim();
-    av.textContent = f ? initials({ first: f, last: last.value.trim() }) : '?';
-    av.style.setProperty('--av', color);
-    avText.textContent = f ? `${greeting()}, ${f}!` : 'Kirjoita nimesi, niin näet tervehdyksen.';
-  };
-  const swatches = h('div', { class: 'swatches', role: 'radiogroup', 'aria-label': 'Tilin väri' });
-  for (const col of AV_COLORS) {
-    const b = h('button', { type: 'button', class: 'swatch' + (col === color ? ' on' : ''), style: `--sw:${col}`, role: 'radio', 'aria-checked': String(col === color), 'aria-label': 'Väri ' + (AV_COLORS.indexOf(col) + 1),
-      onclick: () => {
-        color = col;
-        swatches.querySelectorAll('.swatch').forEach(s => { s.classList.toggle('on', s === b); s.setAttribute('aria-checked', String(s === b)); });
-        update();
-      } });
-    swatches.append(b);
+function nameInput(value) {
+  return h('input', { class: 'input', value: value || '', placeholder: 'Nimesi', autocomplete: 'name', 'aria-label': 'Nimi' });
+}
+// Tyhjä nimi ravistaa kenttää eikä mene läpi
+function readName(input) {
+  const v = input.value.trim().replace(/\s+/g, ' ');
+  if (!v) {
+    input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
+    input.focus();
   }
-  first.addEventListener('input', update);
-  last.addEventListener('input', update);
-  update();
-  const submit = () => {
-    const f = first.value.trim();
-    if (!f) {
-      const lab = first.closest('label');
-      lab.classList.remove('shake'); void lab.offsetWidth; lab.classList.add('shake');
-      first.focus();
-      return;
-    }
-    onSubmit({ first: f, last: last.value.trim(), group: group.value.trim(), color, created: p?.created || Date.now() });
-  };
-  return {
-    fields: h('div', { class: 'ob-fields' },
-      h('label', { class: 'field' }, 'Etunimi', first),
-      h('label', { class: 'field' }, 'Sukunimi', last),
-      h('label', { class: 'field full' }, 'Luokka tai ryhmä (valinnainen)', group),
-      h('div', { class: 'field full' }, 'Tilin väri', swatches)),
-    preview: h('div', { class: 'ob-preview' }, av, avText),
-    submit,
-    focus: () => first.focus(),
-  };
+  return v;
 }
 
 function showOnboarding(done) {
   const el = $('#onboard');
   const quick = reduceMotion();
-  const guess = (courses.find(c => c.student)?.student || '').trim().split(/\s+/).filter(Boolean);
-  const form = accountForm({ first: guess[0] || '', last: guess.slice(1).join(' ') }, p => {
-    profile = p; saveProfile(); drawAvatar();
-    courses.forEach(c => { if (!c.student) c.student = fullName(); });
+  const input = nameInput(courses.find(c => c.student)?.student?.trim());
+  const submit = () => {
+    const name = readName(input);
+    if (!name) return;
+    profile = { name }; saveProfile();
+    courses.forEach(c => { if (!c.student) c.student = name; });
     saveNow();
     el.querySelector('.ob-card').style.animation = 'obOut .5s cubic-bezier(.16, 1, .3, 1) both';
     setTimeout(() => {
       el.replaceChildren(h('div', { class: 'backdrop' }),
-        h('div', { class: 'ob-hello', style: `--av:${p.color}` }, `${greeting()}, `, h('span', {}, p.first), '!',
-          h('small', {}, 'Tilisi on valmis. Tervetuloa MathSmartiin.')));
+        h('div', { class: 'ob-hello' }, 'Hei, ', h('span', {}, firstName()), '!',
+          h('small', {}, 'Tervetuloa MathSmartiin.')));
       setTimeout(() => {
         el.classList.add('out');
         setTimeout(() => { el.hidden = true; el.classList.remove('out'); el.replaceChildren(); done(); }, quick ? 0 : 650);
       }, quick ? 700 : 1800);
     }, quick ? 0 : 450);
-  });
+  };
   const logo = document.createElement('div');
   logo.innerHTML = LOGO_SVG('ob-logo');
-  form.fields.style.setProperty('--i', 3);
-  form.preview.style.setProperty('--i', 4);
   el.replaceChildren(h('div', { class: 'backdrop' }),
-    h('form', { class: 'ob-card', onsubmit: e => { e.preventDefault(); form.submit(); } },
+    h('form', { class: 'ob-card', onsubmit: e => { e.preventDefault(); submit(); } },
       logo.firstChild,
-      h('h1', { style: '--i:1' }, 'Tervetuloa MathSmartiin'),
-      h('p', { style: '--i:2' }, 'Luo tili, niin MathSmart tervehtii sinua ja täyttää nimesi valmiiksi palautettaviin Exceleihin.'),
-      form.fields,
-      form.preview,
-      h('div', { class: 'ob-actions', style: '--i:5' },
-        h('small', {}, 'Tili tallentuu vain tälle koneelle.'),
-        h('button', { class: 'btn primary big', type: 'submit' }, 'Luo tili'))));
+      h('h1', { style: '--i:1' }, 'Hei! Mikä on nimesi?'),
+      h('p', { style: '--i:2' }, 'MathSmart tervehtii sinua nimeltä ja täyttää nimesi palautettaviin Exceleihin.'),
+      h('label', { class: 'field', style: '--i:3' }, input),
+      h('div', { class: 'ob-actions', style: '--i:4' },
+        h('small', {}, 'Nimi tallentuu vain tälle koneelle.'),
+        h('button', { class: 'btn primary big', type: 'submit' }, 'Jatka'))));
   el.hidden = false;
-  setTimeout(form.focus, quick ? 0 : 500);
+  setTimeout(() => input.focus(), quick ? 0 : 500);
 }
 
-function accountDialog() {
+function nameDialog() {
   if (!profile) { showOnboarding(() => route()); return; }
-  const form = accountForm(profile, p => {
-    profile = p; saveProfile(); drawAvatar();
-    dlg.close(); route(); toast('Tili päivitetty.');
-  });
-  openDialog(h('form', { onsubmit: e => { e.preventDefault(); form.submit(); } },
+  const input = nameInput(profile.name);
+  openDialog(h('form', { onsubmit: e => {
+      e.preventDefault();
+      const name = readName(input);
+      if (!name) return;
+      profile = { name }; saveProfile();
+      dlg.close(); route(); toast('Nimi päivitetty.');
+    } },
     h('div', { class: 'dlg-body' },
-      h('h2', {}, 'Oma tili'),
+      h('h2', {}, 'Vaihda nimeä'),
       h('p', {}, 'Nimesi näkyy tervehdyksessä ja täytetään palautettaviin Exceleihin.'),
-      form.fields, form.preview),
+      h('label', { class: 'field' }, input)),
     h('div', { class: 'dlg-foot' },
-      h('button', { type: 'button', class: 'btn danger left', onclick: removeAccount }, 'Poista tili'),
       h('button', { type: 'button', class: 'btn', onclick: () => dlg.close() }, 'Peruuta'),
       h('button', { type: 'submit', class: 'btn primary' }, 'Tallenna'))));
-}
-async function removeAccount() {
-  if (!await confirmDialog('Poistetaanko tili?', 'Nimesi ja tilin asetukset poistetaan tältä koneelta. Kurssit ja merkinnät säilyvät, ja sovellus pyytää luomaan uuden tilin.', 'Poista tili', true)) return;
-  profile = null;
-  try { localStorage.removeItem(PROFILE_KEY); } catch (e) {}
-  drawAvatar();
-  showOnboarding(() => route());
+  setTimeout(() => input.focus(), 50);
 }
 
 /* ---------- Teema ---------- */
@@ -2120,7 +2058,6 @@ loadProfile();
 loadDays();
 renderMenubar();
 drawStreakBtn();
-drawAvatar();
 route();
 if (profile) showStreak();
 else showOnboarding(() => { route(); showStreak(); });
