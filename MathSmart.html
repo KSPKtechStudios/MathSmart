@@ -651,6 +651,69 @@ dialog:not(.streak)[open]::backdrop { animation: bdIn .4s ease both; }
 @keyframes cellFlash { 0%, 40% { box-shadow: 0 0 0 3px var(--accent); transform: scale(1.12); } }
 
 
+
+/* ---------- Esittely ja vinkit ---------- */
+.coach-block { position: fixed; inset: 0; z-index: 180; }
+.coach-ring {
+  position: fixed; z-index: 181; border-radius: 12px; pointer-events: none;
+  box-shadow: 0 0 0 3px var(--accent), 0 0 0 200vmax rgba(8, 8, 14, .5);
+  transition: left .45s var(--out), top .45s var(--out), width .45s var(--out), height .45s var(--out);
+}
+.coach-ring.soft { box-shadow: 0 0 0 3px var(--accent), 0 0 24px 4px color-mix(in srgb, var(--accent) 45%, transparent); animation: ringPulse 1.6s ease-in-out infinite; }
+@keyframes ringPulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 40%, transparent), 0 0 30px 8px color-mix(in srgb, var(--accent) 30%, transparent); } }
+.coach-card {
+  position: fixed; z-index: 182; width: min(330px, calc(100vw - 32px)); padding: 18px 18px 14px; border-radius: 16px; border: 1px solid var(--rim);
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom)), var(--surface);
+  -webkit-backdrop-filter: blur(30px) saturate(150%); backdrop-filter: blur(30px) saturate(150%);
+  box-shadow: inset 0 1px 0 var(--edge), 0 30px 70px -24px rgba(0, 0, 0, .6);
+  animation: coachIn .5s var(--out) both;
+}
+@keyframes coachIn { from { opacity: 0; transform: translateY(8px) scale(.96); } }
+.coach-card .c-step { font-size: 12px; color: var(--faint); font-weight: 600; letter-spacing: .03em; }
+.coach-card h3 { margin: 2px 0 6px; font-family: var(--display); font-size: 19px; font-weight: 600; }
+.coach-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.coach-card kbd, .tip kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border-radius: 5px; border: 1px solid var(--hairline-strong); background: var(--field); color: var(--ink); }
+.coach-foot { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.coach-foot .skip { white-space: nowrap; margin-right: auto; border: 0; background: transparent; color: var(--faint); font-size: 13px; padding: 4px 2px; }
+.coach-foot .skip:hover { color: var(--ink); text-decoration: underline; }
+.coach-dots { display: flex; gap: 4px; margin-right: auto; }
+.coach-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--hairline-strong); }
+.coach-dots i.on { background: var(--accent); width: 16px; border-radius: 3px; }
+.welcome-q { text-align: center; padding: 30px 28px 8px; }
+.welcome-q .wave { font-size: 44px; display: inline-block; animation: wave 1.8s ease-in-out .3s 2; transform-origin: 70% 80%; }
+@keyframes wave { 15%, 45% { transform: rotate(16deg); } 30%, 60% { transform: rotate(-8deg); } 75% { transform: rotate(0); } }
+.welcome-q h2 { margin: 10px 0 8px; font-family: var(--display); font-size: 26px; font-weight: 600; }
+.welcome-q p { margin: 0 auto 6px; max-width: 340px; color: var(--muted); }
+.welcome-foot { display: flex; flex-direction: column; gap: 8px; padding: 14px 28px 26px; }
+.welcome-foot .btn { justify-content: center; }
+.tip {
+  position: fixed; left: 22px; bottom: 22px; z-index: 72; width: min(340px, calc(100vw - 110px)); padding: 14px 16px 12px 16px; border-radius: 16px;
+  border: 1px solid color-mix(in srgb, #e0a84e 45%, var(--rim));
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom)), var(--surface);
+  -webkit-backdrop-filter: blur(26px) saturate(150%); backdrop-filter: blur(26px) saturate(150%);
+  box-shadow: inset 0 1px 0 var(--edge), 0 24px 60px -22px rgba(0, 0, 0, .55);
+  overflow: hidden; animation: tipIn .6s var(--spring) both;
+}
+.tip.out { animation: tipOut .35s var(--out) both; }
+@keyframes tipIn { from { opacity: 0; transform: translateY(24px) scale(.9); } }
+@keyframes tipOut { to { opacity: 0; transform: translateY(14px) scale(.96); } }
+.tip-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.tip-head svg { width: 20px; height: 20px; flex: none; animation: bulb 2.4s ease-in-out infinite; }
+@keyframes bulb { 50% { filter: drop-shadow(0 0 6px rgba(255, 196, 70, .9)); } }
+.tip-head b { font-family: var(--display); font-size: 16px; flex: 1; }
+.tip-head small { color: var(--faint); font-size: 12px; }
+.tip-head .x { border: 0; background: transparent; color: var(--faint); font-size: 18px; line-height: 1; padding: 0 2px; }
+.tip-head .x:hover { color: var(--ink); }
+.tip p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.tip-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 13px; }
+.tip-foot button { border: 0; background: transparent; padding: 2px 0; font-weight: 600; color: var(--accent); }
+.tip-foot button.off { margin-left: auto; font-weight: 400; color: var(--faint); }
+.tip-foot button:hover { text-decoration: underline; }
+.tip-bar { height: 3px; margin: 10px -16px -12px; }
+.tip-bar i { display: block; height: 100%; background: #e0a84e; transform-origin: left; animation: tipBar var(--dur, 14s) linear forwards; }
+.tip:hover .tip-bar i, .tip:focus-within .tip-bar i { animation-play-state: paused; }
+@keyframes tipBar { to { transform: scaleX(0); } }
+@media (max-width: 600px) { .tip { left: 14px; bottom: 14px; } }
 /* ---------- Opettajat ---------- */
 .teacher-line { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; color: var(--muted); font-size: 14px; max-width: 460px; }
 .teacher-line > span { margin-right: 4px; }
@@ -1589,6 +1652,7 @@ function renderCourse(c, sheetIdx) {
   wrap.append(extras);
 
   if (entering) growFill(score, '0%');
+  if (coachState.tour && !coachState.courseTour && sheet) setTimeout(() => { if (!busy()) courseTour(); }, 700);
 }
 
 function secText(c, sec) {
@@ -1679,6 +1743,7 @@ let brush = 'done';
 try { if (statusDef(localStorage.getItem(BRUSH_KEY))) brush = localStorage.getItem(BRUSH_KEY); } catch (e) {}
 function setBrush(k) {
   brush = k;
+  if (k !== 'done') hint('brush', '.brush', 'Merkintätapa vaihtui', `Nyt klikkaus merkitsee: ${statusDef(k).label}. Muista vaihtaa takaisin ”Tehty”-tilaan näppäimellä [1], kun teet tehtäviä pisteisiin.`, 150);
   try { localStorage.setItem(BRUSH_KEY, k); } catch (e) {}
   document.querySelectorAll('.brush button').forEach(b => { const on = b.dataset.st === k; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
 }
@@ -1728,7 +1793,11 @@ function chapterRow(c, ch) {
     if (!Object.keys(f).length) delete c.state.flags[ch.id];
     touch(c);
     rerender(key, before);
-    if (st === 'done') logActivity();
+    if (st === 'done') {
+      logActivity();
+      tipAfterMark();
+      hint('firstDone', () => document.querySelector(`[data-ch="${ch.id}"] [data-k="${CSS.escape(key)}"]`), 'Ensimmäinen tehtävä merkitty!', 'Hienoa! Pisteet päivittyivät heti. Klikkaa samaa tehtävää uudelleen, jos haluat poistaa merkinnän, tai paina [Ctrl+Z].');
+    } else if (st) hint('firstFlag', '#flags', 'Merkintä tallessa', 'Kesken olevat, myöhemmin katsottavat ja apua kaipaavat tehtävät löytyvät Omat merkinnät -listasta. Ne eivät vaikuta pisteisiin.');
   };
   let tpBefore = null;
   return h('div', { class: 'l-row ch' + (count ? '' : ' empty'), 'data-ch': ch.id },
@@ -2016,6 +2085,7 @@ function menuDefs() {
     ] },
     { label: 'Näytä', items: [
       { label: 'Tumma tila', check: currentTheme() === 'dark', run: () => toggleTheme() },
+      { label: 'Vinkit', check: coachState.tips, run: () => { coachState.tips = !coachState.tips; saveCoach(); if (coachState.tips) showTip(true); else hideTip(); } },
       { label: 'Pisteiden erittely', check: scoreDetailsOpen, off: !c?.scoring, run: () => { scoreDetailsOpen = !scoreDetailsOpen; refreshStats(c); } },
       '-',
       { head: 'Tavoitetaso' },
@@ -2034,6 +2104,10 @@ function menuDefs() {
     ] },
     { label: 'Ohje', items: [
       { label: 'Pikanäppäimet', key: 'F1', run: showShortcuts },
+      '-',
+      { label: 'Esittely', run: () => { coachState.tour = 'done'; coachState.courseTour = false; saveCoach(); if (currentCourse()) courseTour(); else homeTour(); } },
+      { label: 'Näytä vinkki', run: () => showTip(true) },
+      '-',
       { label: 'Tietoja MathSmartista', run: showAbout },
     ] },
   ];
@@ -2323,6 +2397,200 @@ function nameDialog() {
       h('button', { type: 'button', class: 'btn', onclick: () => dlg.close() }, 'Peruuta'),
       h('button', { type: 'submit', class: 'btn primary' }, 'Tallenna'))));
   setTimeout(() => input.focus(), 50);
+}
+
+/* ---------- Esittely ja vinkit ---------- */
+const COACH_KEY = 'mathsmart.coach';
+let coachState = { tour: null, courseTour: false, hints: {}, tips: true, tipIdx: 0 };
+try { coachState = { ...coachState, ...JSON.parse(localStorage.getItem(COACH_KEY) || '{}') }; } catch (e) {}
+const saveCoach = () => { try { localStorage.setItem(COACH_KEY, JSON.stringify(coachState)); } catch (e) {} };
+let coachActive = false;
+// "[Ctrl+Z]" tekstissä muuttuu näppäinmerkiksi
+const richText = t => t.split(/(\[[^\]]+\])/).filter(Boolean).map(x => x[0] === '[' ? h('kbd', {}, x.slice(1, -1)) : x);
+const resolveEl = el => typeof el === 'function' ? el() : el ? $(el) : null;
+const busy = () => coachActive || dlg.open || !$('#onboard').hidden || openMenuIdx !== -1 || !cellPop.hidden;
+
+// Askel kerrallaan etenevä esittely; block=true himmentää muun näkymän ja estää klikkailun
+function coach(steps, { block = true, doneLabel = 'Valmis' } = {}) {
+  return new Promise(res => {
+    steps = steps.filter(st => !st.el || resolveEl(st.el));
+    if (!steps.length) { res(true); return; }
+    coachActive = true;
+    hideTip();
+    const nodes = [];
+    const blocker = block ? h('div', { class: 'coach-block' }) : null;
+    const ring = h('div', { class: 'coach-ring' + (block ? '' : ' soft') });
+    let card = null, i = 0, target = null;
+    if (blocker) { document.body.append(blocker); nodes.push(blocker); }
+    document.body.append(ring); nodes.push(ring);
+    const place = () => {
+      if (!card) return;
+      // Rivi piirretään merkittäessä uudelleen, joten kohde haetaan tarvittaessa uudestaan
+      if (target && !target.isConnected) target = resolveEl(steps[i].el);
+      const cw = card.offsetWidth, chh = card.offsetHeight;
+      if (!target) {
+        ring.style.cssText = `left:50%;top:50%;width:0;height:0;`;
+        card.style.left = (innerWidth - cw) / 2 + 'px'; card.style.top = (innerHeight - chh) / 2 + 'px';
+        return;
+      }
+      const r = target.getBoundingClientRect(), pad = 6;
+      Object.assign(ring.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: r.height + pad * 2 + 'px' });
+      let top = r.bottom + 14;
+      if (top + chh > innerHeight - 10) top = r.top - chh - 14;
+      if (top < 10) top = Math.min(innerHeight - chh - 10, Math.max(10, r.top + r.height / 2 - chh / 2));
+      const left = Math.max(12, Math.min(r.left + r.width / 2 - cw / 2, innerWidth - cw - 12));
+      card.style.left = left + 'px'; card.style.top = top + 'px';
+    };
+    const finish = completed => {
+      coachActive = false;
+      nodes.forEach(n => n.remove()); card?.remove();
+      removeEventListener('resize', place); removeEventListener('scroll', place, true);
+      document.removeEventListener('keydown', onKey, true);
+      res(completed);
+    };
+    const show = () => {
+      const st = steps[i];
+      st.prep?.();
+      target = resolveEl(st.el);
+      if (target) {
+        const r = target.getBoundingClientRect();
+        if (r.top < 70 || r.bottom > innerHeight - 20) target.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
+      }
+      card?.remove();
+      const last = i === steps.length - 1;
+      card = h('div', { class: 'coach-card', role: 'dialog', 'aria-live': 'polite' },
+        steps.length > 1 ? h('div', { class: 'c-step' }, `${i + 1} / ${steps.length}`) : null,
+        h('h3', {}, st.title),
+        h('p', {}, richText(st.text)),
+        h('div', { class: 'coach-foot' },
+          steps.length > 1 && !last ? h('button', { class: 'skip', onclick: () => finish(false) }, 'Ohita esittely') : h('span', { class: 'coach-dots' }),
+          i > 0 ? h('button', { class: 'btn', onclick: () => { i--; show(); } }, 'Edellinen') : null,
+          h('button', { class: 'btn primary', onclick: () => { if (last) finish(true); else { i++; show(); } } }, last ? (st.done || doneLabel) : 'Seuraava →')));
+      document.body.append(card);
+      place();
+      setTimeout(place, 380);
+      card.querySelector('.btn.primary').focus({ preventScroll: true });
+    };
+    const onKey = e => {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(false); }
+      else if (e.key === 'ArrowRight' && block) { e.preventDefault(); card.querySelector('.btn.primary').click(); }
+      else if (e.key === 'ArrowLeft' && block && i > 0) { e.preventDefault(); i--; show(); }
+    };
+    addEventListener('resize', place); addEventListener('scroll', place, true);
+    document.addEventListener('keydown', onKey, true);
+    show();
+  });
+}
+
+// Kerran näytettävä vinkkikupla, kun jotain tehdään ensimmäistä kertaa
+function hint(key, el, title, text, delay = 450) {
+  if (coachState.hints[key]) return;
+  coachState.hints[key] = true; saveCoach();
+  setTimeout(() => {
+    if (coachActive) return;
+    coach([{ el, title, text }], { block: false, doneLabel: 'Selvä!' });
+  }, delay);
+}
+
+function welcomeQuestion() {
+  if (coachState.tour) return;
+  openDialog(
+    h('div', { class: 'welcome-q' },
+      h('span', { class: 'wave', 'aria-hidden': 'true' }, '👋'),
+      h('h2', {}, `Hei${profile ? ', ' + firstName() : ''}! Oletko uusi käyttäjä?`),
+      h('p', {}, 'Näytetäänkö lyhyt esittely MathSmartin tärkeimmistä jutuista? Se kestää alle minuutin.')),
+    h('div', { class: 'welcome-foot' },
+      h('button', { class: 'btn primary big', onclick: () => { dlg.close(); coachState.tour = 'done'; saveCoach(); setTimeout(homeTour, 250); } }, 'Kyllä, näytä esittely'),
+      h('button', { class: 'btn big', onclick: () => { dlg.close(); coachState.tour = 'skipped'; coachState.courseTour = true; saveCoach(); toast('Selvä! Esittelyn saa myöhemmin kohdasta Ohje → Esittely.'); } }, 'Ei kiitos, osaan jo')));
+}
+
+function homeTour() {
+  return coach([
+    { title: 'Tervetuloa MathSmartiin!', text: 'Käydään läpi, mistä löydät kaiken. Voit liikkua myös nuolinäppäimillä ja lopettaa [Esc]-näppäimellä.' },
+    { el: '#importBtn', title: 'Tuo opettajan Excel', text: 'Aloita tuomalla opettajalta saatu opiskelupöytäkirja. Voit myös raahata Excel-tiedoston suoraan ikkunaan. Pikanäppäin [Ctrl+O].' },
+    { el: '#menubar', title: 'Valikot', text: 'Kaikki toiminnot löytyvät täältä: tiedostot, kumoaminen, näkymät, työkalut ja ohjeet. Pikanäppäimet näet painamalla [F1].' },
+    { el: '#streakBtn', title: 'Streak', text: 'Merkitse joka päivä vähintään yksi tehtävä, niin liekki palaa ja streak kasvaa.' },
+    { el: '#themeBtn', title: 'Tumma ja vaalea tila', text: 'Vaihda teemaa yhdellä klikkauksella.' },
+    { el: '#calcBtn', title: 'Laskin', text: 'Laskin aukeaa tästä tai näppäimellä [F2]. Siinä on trigonometria, potenssit, juuret ja logaritmit.' },
+    { el: () => document.querySelector('.course-row'), title: 'Kurssisi', text: 'Avaa kurssi täältä. Kun avaat sen ensimmäistä kertaa, näytän vielä, miten pöytäkirjaa käytetään.' },
+  ], { doneLabel: 'Aloitetaan!' }).then(ok => {
+    if (!ok) { coachState.courseTour = true; saveCoach(); }
+    const c = currentCourse();
+    if (ok && c) courseTour();
+  });
+}
+
+function courseTour() {
+  if (coachState.courseTour) return;
+  coachState.courseTour = true; saveCoach();
+  return coach([
+    { el: '#score', title: 'Pisteesi', text: 'Tässä näet tehtävämäärät ja pisteet. Ne päivittyvät heti, kun merkitset tehtäviä.' },
+    { el: '.seg', title: 'Tavoitetaso', text: 'Valitse taso, jota tavoittelet. Muut tasot himmenevät, niin oikeat tehtävät erottuvat.' },
+    { el: '.brush', title: 'Merkintätapa', text: 'Valitse, mitä klikkaus merkitsee: tehty, kesken, katso myöhemmin tai tarvitsen apua. Vain ”Tehty” lasketaan pisteisiin. Pikanäppäimet [1]–[4].' },
+    { el: '.ledger .cell', title: 'Merkitse tehtävä', text: 'Klikkaa tehtävää, niin se merkitään. Hiiren oikea painike avaa kaikki vaihtoehdot ja oman muistiinpanon.' },
+    { el: '#teacherLine', title: 'Opettaja', text: 'Lisää opettajat ja valitse kurssin opettaja yhdellä klikkauksella.' },
+    { el: () => [...document.querySelectorAll('.c-head .btn.primary')].pop(), title: 'Lähetä opettajalle', text: 'Tekee valmiin viestin, jossa täytetty Excel on liitteenä. Pikanäppäin [Ctrl+E].' },
+    { el: '#flags', title: 'Omat merkinnät', text: 'Kesken olevat, myöhemmin katsottavat ja apua kaipaavat tehtävät kootaan tänne. Klikkaa, niin hyppäät tehtävään.' },
+  ], { doneLabel: 'Selvä, kiitos!' });
+}
+
+const TIPS = [
+  'Painamalla [Ctrl+Z] voit kumota viimeisimmän merkinnän.',
+  'Näppäimillä [1] [2] [3] [4] vaihdat merkintätapaa: tehty, kesken, katso myöhemmin, tarvitsen apua.',
+  'Hiiren oikealla painikkeella saat tehtävään oman muistiinpanon, esim. ”kaava sivulla 42”.',
+  'Laskin aukeaa näppäimellä [F2]. Edelliseen tulokseen viittaa kirjoittamalla Ans.',
+  'Laskimen DEG/RAD-napista vaihdat, lasketaanko kulmat asteina vai radiaaneina.',
+  'Laskinta voi siirtää raahaamalla sen otsikosta. Tuplaklikkaus palauttaa sen kulmaan.',
+  'Laskimeen voi kirjoittaa ilman kertomerkkiä: 2(3+4) ja 2π toimivat.',
+  'Lähetä pöytäkirja opettajalle pikanäppäimellä [Ctrl+E].',
+  'Täytetyn Excelin saat ladattua pikanäppäimellä [Ctrl+S].',
+  'Voit raahata opettajan Excel-tiedoston suoraan MathSmartin ikkunaan.',
+  'Tavoitetaso himmentää muut tasot, niin näet heti, mitkä tehtävät ovat sinulle tärkeimmät.',
+  'Työkalut → Siirry kappaleeseen ilman merkintöjä vie suoraan seuraavaan tekemättömään kappaleeseen.',
+  'Omat merkinnät -listasta pääset yhdellä klikkauksella kesken jääneeseen tehtävään.',
+  'Ota välillä varmuuskopio: Tiedosto → Tallenna varmuuskopio. Silloin merkinnät eivät katoa.',
+  'Kertaustehtäviä voi lisätä monta kerralla pilkulla erotettuna, esim. K1, K2, K5.',
+  'Merkitse joka päivä vähintään yksi tehtävä, niin streak kasvaa.',
+  'Painamalla [F1] näet kaikki pikanäppäimet.',
+];
+const TIP_GAP = 3 * 60e3, TIP_FIRST = 25e3, TIP_SHOW = 14e3;
+let lastTipAt = Date.now() - TIP_GAP + TIP_FIRST, lastActivityAt = Date.now(), tipTimer = null, marksSinceTip = 0;
+const BULB = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffc447" d="M12 2.5a6.8 6.8 0 0 0-4 12.3c.7.5 1.1 1.2 1.2 2h5.6c.1-.8.5-1.5 1.2-2A6.8 6.8 0 0 0 12 2.5z"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M9.5 19.5h5M10.3 22h3.4"/></svg>';
+function hideTip() {
+  const el = $('#tip');
+  if (!el) return;
+  clearTimeout(tipTimer);
+  el.classList.add('out');
+  setTimeout(() => el.remove(), reduceMotion() ? 0 : 340);
+}
+function showTip(force) {
+  if (!force && (!coachState.tips || busy())) return;
+  $('#tip')?.remove(); clearTimeout(tipTimer);
+  const idx = coachState.tipIdx % TIPS.length;
+  coachState.tipIdx = idx + 1; saveCoach();
+  lastTipAt = Date.now(); marksSinceTip = 0;
+  const head = h('div', { class: 'tip-head' });
+  head.innerHTML = BULB;
+  head.append(h('b', {}, 'Vinkki!'), h('small', {}, `${idx + 1}/${TIPS.length}`),
+    h('button', { class: 'x', 'aria-label': 'Sulje vinkki', title: 'Sulje', onclick: hideTip }, '×'));
+  const bar = h('div', { class: 'tip-bar' }, h('i', { style: `--dur:${TIP_SHOW / 1000}s` }));
+  const el = h('aside', { class: 'tip', id: 'tip', role: 'status', 'aria-live': 'polite' }, head,
+    h('p', {}, richText(TIPS[idx])),
+    h('div', { class: 'tip-foot' },
+      h('button', { onclick: () => showTip(true) }, 'Seuraava vinkki →'),
+      h('button', { class: 'off', onclick: () => { coachState.tips = false; saveCoach(); hideTip(); toast('Vinkit pois päältä. Saat ne takaisin: Näytä → Vinkit.'); } }, 'Älä näytä vinkkejä')),
+    bar);
+  bar.firstChild.addEventListener('animationend', hideTip);
+  document.body.append(el);
+}
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { lastActivityAt = Date.now(); }, { passive: true, capture: true }));
+setInterval(() => {
+  const now = Date.now();
+  if (now - lastTipAt > TIP_GAP && now - lastActivityAt < 60e3) showTip();
+}, 5000);
+// Merkitsemisen lomassa vinkki tulee vähän useammin
+function tipAfterMark() {
+  if (++marksSinceTip >= 8 && Date.now() - lastTipAt > 60e3) setTimeout(() => showTip(), 900);
 }
 
 /* ---------- Opettajat ja lähetys ---------- */
@@ -2718,7 +2986,7 @@ function toggleCalc(show = calcEl.hidden) {
   calcBtn.classList.toggle('on', show);
   calcBtn.setAttribute('aria-expanded', String(show));
   calcBtn.setAttribute('aria-label', show ? 'Sulje laskin' : 'Avaa laskin');
-  if (show) { placeCalc(); calcInput.focus(); calcInput.select(); }
+  if (show) { placeCalc(); calcInput.focus(); calcInput.select(); hint('calc', '#calc', 'Laskin auki!', 'Kirjoita lasku näppäimistöllä ja paina [Enter]. Desimaalierottimeksi käy pilkku. Laskinta voi siirtää otsikosta raahaamalla, ja [Esc] sulkee sen.', 300); }
   else if (calcEl.contains(document.activeElement)) calcBtn.focus();
 }
 calcBtn.onclick = () => toggleCalc();
@@ -2777,8 +3045,10 @@ loadDays();
 renderMenubar();
 drawStreakBtn();
 route();
-if (profile) showStreak();
-else showOnboarding(() => { route(); showStreak(); });
+if (profile) {
+  showStreak();
+  if (!coachState.tour) dlg.addEventListener('close', () => setTimeout(welcomeQuestion, 350), { once: true });
+} else showOnboarding(() => { route(); welcomeQuestion(); });
 </script>
 </body>
 </html>
