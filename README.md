@@ -9,7 +9,9 @@ MathSmart on matematiikan opiskelupöytäkirjasovellus. Tuo opettajan Excel-pohj
 - Opettajan Excel-tiedoston tuonti ja täytetyn pöytäkirjan vienti
 - Excel-tyylinen taulukko: luvut riveinä, osaamistasot (perus, hyvä, mestari) sarakkeina
 - Sama tehtävä voidaan merkitä usealle tasolle, ja pisteet lasketaan tasoittain
-- Päivittäinen streak
+- Omat merkintätavat: tehty (lasketaan pisteisiin), kesken, katso myöhemmin ja tarvitsen apua sekä muistiinpano tehtävään (oikea klikkaus)
+- Laskin oikeassa alakulmassa (F2): trigonometria asteina tai radiaaneina, potenssit, juuret, logaritmit ja historia
+- Päivittäinen streak ja viikkonäkymä maanantaista sunnuntaihin
 - Valikkorivi (Tiedosto · Muokkaa · Näytä · Työkalut · Ohje) ja kumoaminen (Ctrl+Z)
 - Tumma ja vaalea teema
 - Kysyy ensimmäisellä kerralla nimesi ja tervehtii sinua nimeltä
