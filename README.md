@@ -15,6 +15,7 @@ MathSmart on matematiikan opiskelupöytäkirjasovellus. Tuo opettajan Excel-pohj
 - Päivittäinen streak ja viikkonäkymä maanantaista sunnuntaihin
 - Valikkorivi (Tiedosto · Muokkaa · Näytä · Työkalut · Ohje) ja kumoaminen (Ctrl+Z)
 - Tumma ja vaalea teema
+- Kellonaika ja päivämäärä yläpalkissa
 - Kysyy ensimmäisellä kerralla nimesi ja tervehtii sinua nimeltä
 - Esittely ensimmäisellä käynnistyskerralla, vinkkikuplat ensimmäisistä toiminnoista ja Vinkki!-ilmoitukset pikanäppäimistä ja työkaluista (Näytä → Vinkit, Ohje → Esittely)
 - Varmuuskopion tallennus ja palautus
